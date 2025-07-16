@@ -1,1 +1,1 @@
-#Learning Go and implementing good prectices based on industry usage.
+# Learning Go and implementing good practices based on industry usage.
