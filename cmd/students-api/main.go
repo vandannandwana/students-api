@@ -10,8 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	config "github.com/vandannandwana/students-api/internal"
+	config "github.com/vandannandwana/students-api/internal/config"
 	"github.com/vandannandwana/students-api/internal/http/handlers/student"
+	"github.com/vandannandwana/students-api/internal/storage/sqlite"
 )
 
 func main() {
@@ -21,10 +22,18 @@ func main() {
 
 	//database setup
 
+	storage, err := sqlite.New(cfg)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	slog.Info("Storage Initialized", slog.String("env", cfg.Env), slog.String("version:", "1.0.0"))
+
 	//server route setup
 	router := http.NewServeMux()
 
-	router.HandleFunc("POST /api/students", student.New())
+	router.HandleFunc("POST /api/students", student.New(storage))
 
 	//http server setup
 	server := http.Server{
