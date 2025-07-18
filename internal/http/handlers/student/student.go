@@ -7,12 +7,41 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/vandannandwana/students-api/internal/storage"
 	"github.com/vandannandwana/students-api/internal/types"
 	"github.com/vandannandwana/students-api/internal/utils/response"
 )
+
+func GetById(storage storage.Storage) http.HandlerFunc {
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+
+		_id := request.PathValue("id")
+		id, err := strconv.ParseInt(_id, 10, 64)
+
+		if err != nil {
+			response.WriteJson(writer, http.StatusBadRequest, response.GeneralError(err))
+			return
+		}
+
+		student, err := storage.GetStudentById(id)
+
+		if err != nil {
+			slog.Error("error getting user", slog.String("id: ", _id))
+			response.WriteJson(writer, http.StatusInternalServerError, response.GeneralError(err))
+			return
+		}
+
+		response.WriteJson(writer, http.StatusOK, student)
+
+		slog.Info("getting student by ", slog.String("id: ", _id))
+
+	}
+
+}
 
 func New(storage storage.Storage) http.HandlerFunc {
 

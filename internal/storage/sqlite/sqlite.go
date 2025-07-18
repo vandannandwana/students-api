@@ -2,13 +2,42 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vandannandwana/students-api/internal/config"
+	"github.com/vandannandwana/students-api/internal/types"
 )
 
 type Sqlite struct {
 	Db *sql.DB
+}
+
+func (s Sqlite) GetStudentById(id int64) (types.Student, error) {
+
+	stmt, err := s.Db.Prepare("SELECT id, name, age, email FROM students WHERE id = ? LIMIT 1")
+
+	if err != nil {
+		return types.Student{}, err
+	}
+
+	defer stmt.Close()
+
+	var student types.Student
+
+	err = stmt.QueryRow(id).Scan(&student.Id, &student.Name, &student.Age, &student.Email)
+
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			return types.Student{}, fmt.Errorf("no student found with id %s", fmt.Sprint(id))
+		}
+
+		return types.Student{}, fmt.Errorf("query Error: %w", err)
+	}
+
+	return student, nil
+
 }
 
 // implementing storage interface by making this function
