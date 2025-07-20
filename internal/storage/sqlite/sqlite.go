@@ -13,6 +13,47 @@ type Sqlite struct {
 	Db *sql.DB
 }
 
+func (s Sqlite) GetStudents() ([]types.Student, error) {
+
+	stmt, err := s.Db.Prepare("SELECT id, name, email, age FROM students")
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	// students types.Students
+
+	
+	
+	var students []types.Student
+	
+	for rows.Next(){
+		var student types.Student
+
+		err := rows.Scan(&student.Id, &student.Name, &student.Email, &student.Age)
+
+		if err != nil{
+			return nil, err
+		}
+
+		students = append(students, student)
+
+	}
+
+	return students, nil
+
+}
+
 func (s Sqlite) GetStudentById(id int64) (types.Student, error) {
 
 	stmt, err := s.Db.Prepare("SELECT id, name, age, email FROM students WHERE id = ? LIMIT 1")

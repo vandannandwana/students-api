@@ -15,6 +15,25 @@ import (
 	"github.com/vandannandwana/students-api/internal/utils/response"
 )
 
+func GetList(storage storage.Storage) http.HandlerFunc {
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+
+		slog.Info("Getting all students")
+
+		students, err := storage.GetStudents()
+
+		if err != nil{
+			response.WriteJson(writer, http.StatusInternalServerError, response.GeneralError(err))
+			return 
+		}
+
+		response.WriteJson(writer, http.StatusOK, students)
+
+	}
+
+}
+
 func GetById(storage storage.Storage) http.HandlerFunc {
 
 	return func(writer http.ResponseWriter, request *http.Request) {
